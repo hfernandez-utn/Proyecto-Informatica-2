@@ -2,60 +2,61 @@
 #include "DFRobot_SHT20.h"
 
 DFRobot_SHT20 sht20;
-int ledPin = 13;
+int pinLed = 13;
 
-class WeatherData {
+class DatosClimaticos {
 public:
-  float humidity;
-  float temperature;
-  float dewPoint;
-  float tempDifference;
+  float humedad;
+  float temperatura;
+  float puntoRocio;
+  float difTemperatura;
 
-  WeatherData(float humidity, float temperature, float dewPoint, float tempDifference) {
-    this->humidity = humidity;
-    this->temperature = temperature;
-    this->dewPoint = dewPoint;
-    this->tempDifference = tempDifference;
+  DatosClimaticos(float humedad, float temperatura, float puntoRocio, float difTemperatura) {
+    this->humedad = humedad;
+    this->temperatura = temperatura;
+    this->puntoRocio = puntoRocio;
+    this->difTemperatura = difTemperatura;
   }
 
   String toString() {
-    String dataString = String(temperature, 1) + " " + String(humidity, 1) + " " + String(dewPoint, 1) + " " + String(tempDifference, 1);
-    return dataString;
+    String cadenaDatos = String(temperatura, 1) + " " + String(humedad, 1) + " " + String(puntoRocio, 1) + " " + String(difTemperatura, 1);
+    return cadenaDatos;
   }
 };
 
 void setup() {
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
-  Serial.println("SHT20 Example!");
+  pinMode(pinLed, OUTPUT);
+  Serial.println("Ejemplo SHT20!");
   sht20.initSHT20();
   delay(100);
   sht20.checkSHT20();
 }
 
 void loop() {
-  float humd = sht20.readHumidity();
-  float temp = sht20.readTemperature();
+  float humedad = sht20.readHumidity();
+  float temperatura = sht20.readTemperature();
 
   // Calcular el punto de rocío
-  float dewPoint = temp - (100 - humd) / 5.0;
+  float puntoRocio = temperatura - (100 - humedad) / 5.0;
 
   // Calcular la diferencia entre la temperatura y el punto de rocío
-  float tempDif = temp - dewPoint;
+  float difTemperatura = temperatura - puntoRocio;
 
   // Enviar datos
-  WeatherData newData = WeatherData(humd, temp, dewPoint, tempDif);
-  Serial.println(newData.toString());
+  DatosClimaticos nuevosDatos = DatosClimaticos(humedad, temperatura, puntoRocio, difTemperatura);
+  Serial.println(nuevosDatos.toString());
 
   // Esperar a que llegue un comando de Processing
   while (Serial.available() > 0) {
-    char command = Serial.read();
-    if (command == '1') {
-      digitalWrite(ledPin, HIGH); // Encender el LED
-    } else if (command == '0') {
-      digitalWrite(ledPin, LOW); // Apagar el LED
+    char comando = Serial.read();
+    if (comando == '1') {
+      digitalWrite(pinLed, HIGH); // Encender el LED
+    } else if (comando == '0') {
+      digitalWrite(pinLed, LOW); // Apagar el LED
     }
   }
 
   delay(1000);
 }
+
